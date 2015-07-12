@@ -1,65 +1,69 @@
 package com.sahaj.testing;
 
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.any;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyList;
 
 /**
- * Created by rbansal on 03/07/15.
+ * Created by manisharana on 7/11/15.
  */
+
 public class TwitterControllerTest {
-    Twitter Twitter;
-    Tweet t1, t2;
-    TwitterController controller;
 
-    @Before
+
+    private Twitter mock;
+    private TwitterController twitterController;
+    private Tweet tweet1;
+    private Tweet tweet2;
+
+    @BeforeTest
     public void setUp() throws Exception {
-        //Real objects used for Collaborator
-        t1 = new Tweet("rohiban", "First Tweet");
-        t2 = new Tweet("kirang", "Second Tweet");
-        //Mock object used for Collaborator
-        Twitter = mock(Twitter.class);
-        //SUT
-        controller = new TwitterController(Twitter);
+        mock = Mockito.mock(Twitter.class);
+        twitterController = new TwitterController(mock);
+        tweet1 = new Tweet("manishaR", "Dummy Tweet");
+        tweet2 = new Tweet("shwetaT", "First Tweet");
     }
 
     @Test
-    public void shouldReadFeedFromTwitterAndTransformThem() {
-        // stub the call to readFeed() to return what we want
-        when(Twitter.readFeed())
-                .thenReturn("@rohiban First Tweet|@kirang Second Tweet");
-
-        List<Tweet> returnedTweets = controller.readFeed();
-
-        // state testing
-        assertEquals(asList(t1, t2), returnedTweets);
+    public void shouldReadFeedFromTwitter(){
+        Mockito.stub(mock.readFeed()).toReturn("@manishaR Dummy Tweet|@shwetaT First Tweet");
+        List<Tweet> tweetList = twitterController.readFeed();
+        assertEquals(asList(tweet1,tweet2), tweetList );
     }
 
     @Test
-    public void shouldPostToTwitterAndReturnSuccessStatusWhenPostIsSuccessful() {
-        String message = "Using Mockito is amazingly simple, once you get the dependencies right!";
-        when(Twitter.post(any(String.class))).thenReturn(true);
-
-        boolean posted = controller.post(message);
-
-        assertTrue(posted);
-        verify(Twitter).post(message);
+    public void shouldPostMessageToTwitterAndReturnTrueIfSuccessful(){
+        Mockito.stub(mock.post("some tweet")).toReturn(true);
+        boolean post = twitterController.post("some tweet");
+        assertEquals(true,post );
+        Mockito.verify(mock).post("some tweet");
     }
 
     @Test
-    public void shouldReturnFailedStatusWhenPostIsUnsuccessful() {
-        String message = "Using Mockito is amazingly simple, once you get the dependencies right!";
-        when(Twitter.post(any(String.class))).thenReturn(false);
+    public void shouldReturnFalseWhenPostIsUnsuccessful() {
+        String message = "some tweet";
+        Mockito.stub(mock.post(message)).toReturn(false);
 
-        boolean posted = controller.post(message);
+        boolean posted = twitterController.post(message);
 
         assertFalse(posted);
+    }
+
+    @Test
+    public void shouldTransformFeedStringIntoTweets(){
+
+
+        String feeds = "@manishaR Dummy Tweet|@shwetaT First Tweet";
+        assertEquals(asList(tweet1,tweet2), twitterController.transformFeed(feeds));
     }
 }

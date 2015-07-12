@@ -4,8 +4,8 @@ package com.sahaj.testing;
  * Created by rbansal on 01/07/15.
  */
 public class Tweet {
-    String origin;
-    String theTweet;
+    private String origin;
+    private String theTweet;
 
     public Tweet(String originHandle, String t) {
         this.origin = originHandle;
